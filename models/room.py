@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from .base import CamelizingModel
 from typing import Optional, TYPE_CHECKING
 from datetime import timedelta, datetime
 
@@ -12,7 +12,7 @@ class RoomState(str, Enum):
     STOPPED = "stopped"
 
 
-class RoomBase(BaseModel):
+class RoomBase(CamelizingModel):
     id: int
     slug: str
 
