@@ -1,6 +1,6 @@
 from enum import Enum
 from .base import CamelizingModel
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 from datetime import timedelta, datetime
 
 
@@ -31,7 +31,22 @@ class RoomDisplay(Room):
     name: str
     image_url: Optional[str]
     max_completion: int = 100
+    stage: Optional[str]
+
+
+class Puzzle(CamelizingModel):
+    name: str
+    completion_worth: int
+    completed: bool
+    state: Optional[dict[str, Any]]
+
+
+class Stage(CamelizingModel):
+    name: str
+    description: Optional[str]
+    puzzles: list[Puzzle]
 
 
 class RoomDetails(RoomDisplay):
-    pass
+    stages: list[Stage]
+    active_stage: int
