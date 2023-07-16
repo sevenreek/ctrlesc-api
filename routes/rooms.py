@@ -78,7 +78,7 @@ def create_rooms():
             state=RoomState.ACTIVE,
             base_time=timedelta(hours=1, minutes=30),
             extra_time=timedelta(minutes=30),
-            started_on=datetime.now() - timedelta(hours=0, minutes=20),
+            started_on=datetime.now() - timedelta(hours=1, minutes=40),
             stopped_on=None,
             completion=20,
             max_completion=90,

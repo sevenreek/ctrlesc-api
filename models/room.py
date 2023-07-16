@@ -12,12 +12,9 @@ class RoomState(str, Enum):
     STOPPED = "stopped"
 
 
-class RoomBase(CamelizingModel):
+class Room(CamelizingModel):
     id: int
     slug: str
-
-
-class Room(RoomBase):
     state: RoomState
     base_time: Optional[timedelta] = timedelta(hours=1)
     extra_time: Optional[timedelta] = timedelta(seconds=0)
