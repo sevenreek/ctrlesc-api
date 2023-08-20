@@ -1,8 +1,15 @@
-from pydantic import BaseModel
+from pydantic import ConfigDict, BaseModel
 from humps import camelize
+from enum import Enum
 
 
 class CamelizingModel(BaseModel):
-    class Config:
-        alias_generator = camelize
-        allow_population_by_field_name = True
+    model_config = ConfigDict(alias_generator=camelize, populate_by_name=True)
+
+
+class TimerState(str, Enum):
+    READY = "ready"
+    ACTIVE = "active"
+    PAUSED = "paused"
+    FINISHED = "finished"
+    STOPPED = "stopped"

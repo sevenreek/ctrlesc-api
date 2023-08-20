@@ -1,10 +1,18 @@
 from fastapi import FastAPI
-from mqtt import mqtt
+from contextlib import asynccontextmanager
+from lib.redis import on_exit as redis_exit, on_start as redis_start
 
 from routes.rooms import router as room_router
 
-app = FastAPI()
-# mqtt.init_app(app)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await redis_start()
+    yield
+    await redis_exit()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(room_router)
 

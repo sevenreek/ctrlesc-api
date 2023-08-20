@@ -1,0 +1,174 @@
+{
+  "slug": "demonic-presence",
+  "name": "Demonic Presence",
+  "image_url": "",
+  "base_time": 7200,
+  "stages": [
+    {
+      "slug": "inside_cells",
+      "name": "Stuck in cells",
+      "description": "The players must cooperate to extract a key using a magnet.",
+      "puzzles": [
+        {
+          "slug": "cells",
+          "name": "Cells",
+          "component": {
+            "type": "digitalState",
+            "completeOverrideEnabled": true,
+            "nameMap": {
+              "left": "Left cell",
+              "right": "Right cell"
+            },
+            "stateMap": {
+              "true": "Open",
+              "false": "Closed"
+            }
+          },
+          "initial_state": {
+            "left": false,
+            "right": false
+          },
+          "completion_worth": 10
+        }
+      ]
+    },
+    {
+      "slug": "open_chest",
+      "name": "Opening the chest",
+      "description": "The players must open a chest to find a crank.",
+      "puzzles": [
+        {
+          "slug": "chest",
+          "name": "Chest",
+          "component": {
+            "type": "unaryDigitalState",
+            "completeOverrideEnabled": true,
+            "stateMap": {
+              "true": "Open",
+              "false": "Closed"
+            }
+          },
+          "initial_state": null,
+          "completion_worth": 5
+        }
+      ]
+    },
+    {
+      "slug": "lower_coffin",
+      "name": "Lowering the coffin",
+      "description": "The players lower the coffin.",
+      "puzzles": [
+        {
+          "slug": "coffin",
+          "name": "Lower the coffin",
+          "component": {
+            "type": "unaryDigitalState",
+            "completeOverrideEnabled": true,
+            "stateMap": {
+              "true": "Lowered",
+              "false": "Not lowered"
+            }
+          },
+          "initial_state": null,
+          "completion_worth": 5
+        }
+      ]
+    },
+    {
+      "slug": "unlock_coffin",
+      "name": "Unlocking the coffin",
+      "description": "The players unlock the coffin using a proper button sequence.",
+      "puzzles": [
+        {
+          "slug": "wall_buttons",
+          "name": "Wall buttons",
+          "completion_worth": 25,
+          "component": {
+            "type": "sequence",
+            "sequenceLength": 4,
+            "completeOverrideEnabled": true
+          },
+          "initial_state": { "sequence": [null, null, null, null] }
+        }
+      ]
+    },
+    {
+      "slug": "assemble_skeleton",
+      "name": "Assembling the skeleton",
+      "description": "The players assemble a skeleton inside the coffin.",
+      "puzzles": [
+        {
+          "slug": "skeleton",
+          "name": "Skeleton",
+          "completion_worth": 10,
+          "component": {
+            "type": "digitalState",
+            "completeOverrideEnabled": true,
+            "nameMap": {
+              "leftLeg": "Left leg",
+              "rightLeg": "Right leg",
+              "leftArm": "Left arm",
+              "rightArm": "Right arm"
+            },
+            "stateMap": {
+              "true": "Placed",
+              "false": "Absent"
+            }
+          },
+          "initial_state": {
+            "leftLeg": false,
+            "rightLeg": false,
+            "leftArm": false,
+            "rightArm": false
+          }
+        }
+      ]
+    },
+    {
+      "slug": "take_book",
+      "name": "Picking up the book",
+      "description": "The players collect the spellbook.",
+      "puzzles": [
+        {
+          "slug": "spellbook_bag",
+          "name": "Spellbook",
+          "component": {
+            "type": "unaryDigitalState",
+            "completeOverrideEnabled": true,
+            "stateMap": {
+              "true": "Lowered",
+              "false": "Not lowered"
+            }
+          },
+          "initial_state": null,
+          "completion_worth": 5
+        }
+      ]
+    },
+    {
+      "slug": "spellcasting",
+      "name": "Spellcasting",
+      "description": "The players cast summoning spells.",
+      "puzzles": [
+        {
+          "slug": "spells",
+          "name": "Spells",
+          "component": {
+            "type": "speechDetection",
+            "completeOverrideEnabled": true,
+            "words": ["Baal", "Lupes", "Capra"],
+            "stateMap": {
+              "true": "Cast",
+              "false": "Waiting"
+            }
+          },
+          "initial_state": {
+            "targetIndex": 0,
+            "lastAttempts": []
+          },
+          "completion_worth": 10
+        }
+      ]
+    }
+  ]
+}
