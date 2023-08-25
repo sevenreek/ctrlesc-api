@@ -6,7 +6,7 @@ from pathlib import Path
 from settings import settings
 from models.rooms import (
     RoomModelDetail,
-    RoomModel,
+    RoomModelOverview,
 )
 
 
@@ -23,7 +23,7 @@ async def fetch_room_model_data(slug: str):
 
 
 async def fetch_room_model_detail(slug: str):
-    content = fetch_room_model_data(slug)
+    content = await fetch_room_model_data(slug)
     return RoomModelDetail.model_validate_json(content)
 
 
@@ -36,4 +36,14 @@ async def fetch_room_models():
             if file.endswith(".json")
         )
     )
+    return jsons
+
+
+async def fetch_room_model_overviews():
+    jsons = await fetch_room_models()
+    return [RoomModelOverview.model_validate_json(json) for json in jsons]
+
+
+async def fetch_room_model_details():
+    jsons = await fetch_room_models()
     return [RoomModelDetail.model_validate_json(json) for json in jsons]

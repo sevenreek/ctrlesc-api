@@ -8,11 +8,14 @@ class UIComponentType(str, Enum):
     DigitalState = "digitalState"
 
 
-class RoomModel(CamelizingModel):
+class BaseRoomModel(CamelizingModel):
     slug: str
     name: str
     image_url: str
     base_time: int = timedelta(hours=1).seconds
+
+
+class RoomModelOverview(BaseRoomModel):
     max_completion: int = 100
 
 
@@ -31,5 +34,5 @@ class StageModel(CamelizingModel):
     puzzles: list[PuzzleModel]
 
 
-class RoomModelDetail(RoomModel):
+class RoomModelDetail(BaseRoomModel):
     stages: list[StageModel]

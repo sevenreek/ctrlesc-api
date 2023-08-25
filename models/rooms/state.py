@@ -10,11 +10,11 @@ class BaseRoomState(CamelizingModel):
     started_on: Optional[datetime] = None
     paused_on: Optional[datetime] = None
     stopped_on: Optional[datetime] = None
-    completion: int = 0
 
 
 class RoomStateOverview(BaseRoomState):
     stage: Optional[str] = None
+    completion: int = 0
 
 
 class PuzzleState(CamelizingModel):
@@ -28,6 +28,6 @@ class StageState(CamelizingModel):
     puzzles: list[PuzzleState]
 
 
-class RoomStateDetails(RoomStateOverview):
+class RoomStateDetail(RoomStateOverview):
     active_stage: Optional[int] = None
     stages: list[StageState]
