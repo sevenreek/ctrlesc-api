@@ -2,6 +2,7 @@ import aiofiles
 import os
 import asyncio
 from pathlib import Path
+import json
 
 from settings import settings
 from models.rooms import (
@@ -10,13 +11,13 @@ from models.rooms import (
 )
 
 
-async def fetch_file(file: str):
+async def fetch_file(file: str) -> str:
     async with aiofiles.open(file) as file:
         content = await file.read()
     return content
 
 
-async def fetch_room_model_data(slug: str):
+async def fetch_room_model_data(slug: str) -> str:
     return await fetch_file(
         os.path.join(settings.room_config_dir, os.path.basename(slug) + ".json")
     )
@@ -27,21 +28,35 @@ async def fetch_room_model_detail(slug: str):
     return RoomModelDetail.model_validate_json(content)
 
 
-async def fetch_room_models():
+async def fetch_room_models() -> list[str]:
     model_files = os.listdir(settings.room_config_dir)
-    jsons = await asyncio.gather(
+    files_data = await asyncio.gather(
         *(
             fetch_room_model_data(Path(file).stem)
             for file in model_files
             if file.endswith(".json")
         )
     )
-    return jsons
+    return files_data
+
+
+def get_max_completion(room_dict):
+    return sum(
+        (
+            puzzle["completion_worth"]
+            for stage in room_dict["stages"]
+            for puzzle in stage["puzzles"]
+        )
+    )
 
 
 async def fetch_room_model_overviews():
-    jsons = await fetch_room_models()
-    return [RoomModelOverview.model_validate_json(json) for json in jsons]
+    file_contents = await fetch_room_models()
+    dicts = [json.loads(content) for content in file_contents]
+    # Calculate max completion based on the configuration
+    for room in dicts:
+        room["max_completion"] = get_max_completion(room)
+    return [RoomModelOverview.model_validate(json) for json in dicts]
 
 
 async def fetch_room_model_details():

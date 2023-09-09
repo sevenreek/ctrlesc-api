@@ -1,12 +1,12 @@
 from typing import Any, Optional, TYPE_CHECKING
-from models.base import CamelizingModel
-from models.rooms.model import (
+from ..base import CamelizingModel
+from ..rooms.model import (
     RoomModelOverview,
     PuzzleModel,
     StageModel,
     RoomModelDetail,
 )
-from models.rooms.state import (
+from ..rooms.state import (
     RoomStateOverview,
     RoomStateDetail,
     PuzzleState,

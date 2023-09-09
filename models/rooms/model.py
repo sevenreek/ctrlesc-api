@@ -12,11 +12,11 @@ class BaseRoomModel(CamelizingModel):
     slug: str
     name: str
     image_url: str
-    base_time: int = timedelta(hours=1).seconds
+    base_time: int
 
 
 class RoomModelOverview(BaseRoomModel):
-    max_completion: int = 100
+    max_completion: int
 
 
 class PuzzleModel(CamelizingModel):

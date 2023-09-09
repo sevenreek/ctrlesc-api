@@ -5,8 +5,8 @@ from datetime import timedelta, datetime
 
 class BaseRoomState(CamelizingModel):
     slug: str
-    state: TimerState = TimerState.READY
-    extra_time: int = timedelta(seconds=0).seconds
+    state: TimerState
+    extra_time: int
     started_on: Optional[datetime] = None
     paused_on: Optional[datetime] = None
     stopped_on: Optional[datetime] = None
