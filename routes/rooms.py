@@ -10,6 +10,7 @@ from models.rooms import (
     RoomDetail,
     RoomOverview,
 )
+from models.rooms.components import UIComponentType
 from models.base import TimerState
 from settings import settings
 from lib.redis import DependsRedis
@@ -51,9 +52,6 @@ async def details(slug: str, redis: DependsRedis):
     return RoomDetail(model, state)
 
 
-from models.rooms.components import ComponentUnion
-
-
-@router.get("/test", response_model=ComponentUnion)
-async def test(slug: str, redis: DependsRedis):
-    return None
+@router.get("/components/supported", response_model=list[UIComponentType])
+async def get_supported_component_types():
+    return [t.value for t in UIComponentType]
