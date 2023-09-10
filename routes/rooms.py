@@ -49,3 +49,11 @@ async def details(slug: str, redis: DependsRedis):
         fetch_room_model_detail(slug), fetch_room_state_detail(redis, slug)
     )
     return RoomDetail(model, state)
+
+
+from models.rooms.components import ComponentUnion
+
+
+@router.get("/test", response_model=ComponentUnion)
+async def test(slug: str, redis: DependsRedis):
+    return None

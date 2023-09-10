@@ -85,8 +85,14 @@
           "completion_worth": 25,
           "component": {
             "type": "sequence",
-            "sequenceLength": 4,
-            "completeOverrideEnabled": true
+            "completeOverrideEnabled": true,
+            "length": 4,
+            "stateMap": {
+              "0": "0",
+              "1": "1",
+              "2": "3",
+              "4": "4"
+            }
           },
           "initial_state": { "sequence": [null, null, null, null] }
         }

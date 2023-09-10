@@ -2,9 +2,10 @@ from typing import Any, Optional, TYPE_CHECKING
 from ..base import CamelizingModel
 from ..rooms.model import (
     RoomModelOverview,
-    PuzzleModel,
+    BasePuzzleModel,
     StageModel,
     RoomModelDetail,
+    ComponentUnion,
 )
 from ..rooms.state import (
     RoomStateOverview,
@@ -14,13 +15,8 @@ from ..rooms.state import (
 )
 
 
-class Puzzle(CamelizingModel):
-    slug: str
-    name: str
-    completion_worth: int
-    completed: bool = False
-    state: Optional[dict[str, Any]] = None
-    component: dict[str, Any]
+class Puzzle(BasePuzzleModel, PuzzleState):
+    pass
 
 
 class Stage(StageModel, StageState):

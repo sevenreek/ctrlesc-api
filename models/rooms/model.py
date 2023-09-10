@@ -1,11 +1,7 @@
-from enum import Enum
 from ..base import CamelizingModel, TimerState
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING, Generic
 from datetime import timedelta, datetime
-
-
-class UIComponentType(str, Enum):
-    DigitalState = "digitalState"
+from .components import ComponentUnion
 
 
 class BaseRoomModel(CamelizingModel):
@@ -19,11 +15,14 @@ class RoomModelOverview(BaseRoomModel):
     max_completion: int
 
 
-class PuzzleModel(CamelizingModel):
+class BasePuzzleModel(CamelizingModel):
     slug: str
     name: str
     completion_worth: int
-    component: dict[str, Any]
+    component: ComponentUnion
+
+
+class InitialPuzzleModel(BasePuzzleModel):
     initial_state: Optional[dict[str, Any]]
 
 
@@ -31,7 +30,7 @@ class StageModel(CamelizingModel):
     slug: str
     name: str
     description: Optional[str] = None
-    puzzles: list[PuzzleModel]
+    puzzles: list[InitialPuzzleModel]
 
 
 class RoomModelDetail(BaseRoomModel):
