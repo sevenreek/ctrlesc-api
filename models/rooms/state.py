@@ -1,12 +1,13 @@
 from ..base import CamelizingModel, TimerState
 from typing import Any, Optional, TYPE_CHECKING
 from datetime import timedelta, datetime
+from pydantic import ConfigDict
 
 
 class BaseRoomState(CamelizingModel):
     slug: str
-    state: TimerState
-    extra_time: int
+    state: TimerState = TimerState.READY
+    extra_time: int = 0
     started_on: Optional[datetime] = None
     paused_on: Optional[datetime] = None
     stopped_on: Optional[datetime] = None

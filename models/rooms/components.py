@@ -7,7 +7,6 @@ from pydantic.functional_validators import BeforeValidator
 
 
 class UIComponentType(str, Enum):
-    UnaryDigitalState = "unaryDigitalState"
     DigitalState = "digitalState"
     Sequence = "sequence"
     SpeechDetection = "speechDetection"
@@ -21,10 +20,6 @@ class BaseComponent(CamelizingModel):
 
 
 ComponentT = TypeVar("ComponentT", bound=BaseComponent)
-
-
-class UnaryDigitalStateComponent(BaseComponent):
-    type: Literal[UIComponentType.UnaryDigitalState]
 
 
 class DigitalStateComponent(BaseComponent):
@@ -42,7 +37,6 @@ class SpeechDetectionComponent(BaseComponent):
 
 
 CLASS_MAP: dict[str, type[BaseModel]] = {
-    UIComponentType.UnaryDigitalState.value: UnaryDigitalStateComponent,
     UIComponentType.DigitalState.value: DigitalStateComponent,
     UIComponentType.Sequence.value: SequenceComponent,
     UIComponentType.SpeechDetection.value: SpeechDetectionComponent,
@@ -55,7 +49,6 @@ def infer_component_type(data: dict):
 
 
 ComponentUnion = Union[
-    UnaryDigitalStateComponent,
     DigitalStateComponent,
     SequenceComponent,
     SpeechDetectionComponent,

@@ -41,14 +41,19 @@
           "slug": "chest",
           "name": "Chest",
           "component": {
-            "type": "unaryDigitalState",
+            "type": "digitalState",
             "completeOverrideEnabled": true,
             "stateMap": {
               "true": "Open",
               "false": "Closed"
+            },
+            "nameMap": {
+              "chest": "Chest"
             }
           },
-          "initial_state": null,
+          "initial_state": {
+            "chest": false
+          },
           "completion_worth": 5
         }
       ]
@@ -62,14 +67,19 @@
           "slug": "coffin",
           "name": "Lower the coffin",
           "component": {
-            "type": "unaryDigitalState",
+            "type": "digitalState",
             "completeOverrideEnabled": true,
             "stateMap": {
               "true": "Lowered",
               "false": "Not lowered"
+            },
+            "nameMap": {
+              "coffin": "Coffin"
             }
           },
-          "initial_state": null,
+          "initial_state": {
+            "coffin": false
+          },
           "completion_worth": 5
         }
       ]
@@ -139,14 +149,19 @@
           "slug": "spellbook_bag",
           "name": "Spellbook",
           "component": {
-            "type": "unaryDigitalState",
+            "type": "digitalState",
             "completeOverrideEnabled": true,
+            "nameMap": {
+              "book": "Book"
+            },
             "stateMap": {
               "true": "Lowered",
               "false": "Not lowered"
             }
           },
-          "initial_state": null,
+          "initial_state": {
+            "book": false
+          },
           "completion_worth": 5
         }
       ]
