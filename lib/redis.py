@@ -5,7 +5,13 @@ import redis.asyncio as redis
 from inspect import Signature
 
 from lib.roomconfigs import fetch_room_model_details
-from models.rooms import RoomModelDetail, RoomStateDetail, PuzzleState, StageState
+from models.rooms import (
+    RoomModelDetail,
+    RoomStateDetailInput,
+    RoomStateDetail,
+    PuzzleState,
+    StageState,
+)
 from models.base import TimerState
 from models.util import extract_model_default_fields
 from settings import settings
@@ -36,7 +42,7 @@ def generate_room_initial_state(room: RoomModelDetail) -> dict[str, Any]:
             "stages": True,
         }
     )
-    room_dict.update(extract_model_default_fields(RoomStateDetail))
+    room_dict.update(extract_model_default_fields(RoomStateDetailInput))
 
     stage: dict
     for stage in room_dict["stages"]:

@@ -6,11 +6,21 @@ from pydantic import ConfigDict
 
 class BaseRoomState(CamelizingModel):
     slug: str
-    state: TimerState = TimerState.READY
-    extra_time: int = 0
+    state: TimerState
+    extra_time: int
     started_on: Optional[datetime] = None
     paused_on: Optional[datetime] = None
     stopped_on: Optional[datetime] = None
+
+
+class BaseRoomStateInput(BaseRoomState):
+    state: TimerState = TimerState.READY
+    extra_time: int = 0
+
+
+class RoomStateOverviewInput(BaseRoomStateInput):
+    stage: Optional[str] = None
+    completion: int = 0
 
 
 class RoomStateOverview(BaseRoomState):
@@ -27,6 +37,11 @@ class PuzzleState(CamelizingModel):
 class StageState(CamelizingModel):
     slug: str
     puzzles: list[PuzzleState]
+
+
+class RoomStateDetailInput(RoomStateOverviewInput):
+    active_stage: Optional[int] = None
+    stages: list[StageState]
 
 
 class RoomStateDetail(RoomStateOverview):
