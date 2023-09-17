@@ -29,6 +29,7 @@ class DigitalStateComponent(BaseComponent):
 class SequenceComponent(BaseComponent):
     length: int
     type: Literal[UIComponentType.Sequence]
+    target_sequence: list[Any]
 
 
 class SpeechDetectionComponent(BaseComponent):
