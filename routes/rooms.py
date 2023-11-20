@@ -1,7 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 import asyncio
 from redis.asyncio import Redis
-
 from models.rooms import (
     RoomModelOverview,
     RoomModelDetail,
@@ -15,7 +14,8 @@ from models.base import TimerState
 from settings import settings
 from lib.redis import DependsRedis
 from lib.roomconfigs import fetch_room_model_overviews, fetch_room_model_detail
-
+from sse_starlette import EventSourceResponse
+import json
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
@@ -42,6 +42,26 @@ async def index(redis: DependsRedis):
         RoomOverview(**(model.model_dump() | state.model_dump()))
         for model, state in zip(models, states)
     ]
+
+
+@router.get("/sse")
+async def sse(request: Request, redis: DependsRedis):
+    async def event_generator():
+        async with redis.pubsub() as ps:
+            await ps.psubscribe("room/state/*")
+            while ps.subscribed:
+                message = await ps.get_message(ignore_subscribe_messages=True)
+                if message is not None:
+                    channel: str = message["channel"]
+                    puzzle_topic_path = channel.split("/")
+                    room, stage, puzzle = puzzle_topic_path[-3:]
+                    state = json.loads(message["data"])
+                    yield json.dumps(
+                        {"room": room, "stage": stage, "puzzle": puzzle, "state": state}
+                    )
+                await asyncio.sleep(0.01)
+
+    return EventSourceResponse(event_generator())
 
 
 @router.get("/{slug}", response_model=RoomDetail)
