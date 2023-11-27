@@ -44,21 +44,34 @@ async def index(redis: DependsRedis):
     ]
 
 
+def create_sse_update(channel: str, string_data: str | None):
+    topic_path = channel.split("/")
+    update_type, room, stage = topic_path[1:4]
+    return_data = {"room": room, "stage": stage}
+    event_data = json.loads(string_data)
+    try:
+        puzzle = topic_path[4]
+        return_data["puzzle"] = puzzle
+    except IndexError:
+        pass
+    match update_type:
+        case "state":
+            return_data["state"] = event_data
+        case "completion":
+            return_data["completed"] = bool(event_data)
+    return {"data": json.dumps(return_data), "event": "update"}
+
+
 @router.get("/sse")
 async def sse(request: Request, redis: DependsRedis):
     async def event_generator():
         async with redis.pubsub() as ps:
-            await ps.psubscribe("room/state/*")
+            await ps.psubscribe("room/state/*", "room/completion/*")
             while ps.subscribed:
                 message = await ps.get_message(ignore_subscribe_messages=True)
                 if message is not None:
                     channel: str = message["channel"]
-                    puzzle_topic_path = channel.split("/")
-                    room, stage, puzzle = puzzle_topic_path[-3:]
-                    state = json.loads(message["data"])
-                    yield json.dumps(
-                        {"room": room, "stage": stage, "puzzle": puzzle, "state": state}
-                    )
+                    yield create_sse_update(channel, message.get("data", None))
                 await asyncio.sleep(0.01)
 
     return EventSourceResponse(event_generator())
