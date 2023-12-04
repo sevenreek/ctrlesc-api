@@ -4,14 +4,9 @@ import asyncio
 import redis.asyncio as redis
 from inspect import Signature
 
-from lib.roomconfigs import fetch_room_model_details
-from models.rooms import (
-    RoomModelDetail,
-    RoomStateDetailInput,
-    RoomStateDetail,
-    PuzzleState,
-    StageState,
-)
+from lib.roomconfigs import fetch_room_configs
+from models.room import RoomConfig, RoomState, StageConfig, StageState
+from models.puzzle import BasePuzzleState
 from models.base import TimerState
 from models.util import extract_model_default_fields
 from settings import settings
@@ -35,30 +30,29 @@ async def get_client():
 DependsRedis = Annotated[redis.Redis, Depends(get_client)]
 
 
-def generate_room_initial_state(room: RoomModelDetail) -> dict[str, Any]:
+def generate_room_initial_state(room: RoomConfig) -> dict[str, Any]:
     room_dict = room.model_dump(
         include={
             "slug": True,
             "stages": True,
         }
     )
-    room_dict.update(extract_model_default_fields(RoomStateDetailInput))
+    room_dict.update(extract_model_default_fields(RoomState))
 
     stage: dict
+    puzzle: dict
     for stage in room_dict["stages"]:
         keys_present_in_state = StageState.model_fields.keys()
         keys_to_drop = stage.keys() - keys_present_in_state
         for key in keys_to_drop:
             stage.pop(key)
-        puzzle: dict
         for puzzle in stage["puzzles"]:
-            puzzle.update(extract_model_default_fields(PuzzleState))
+            puzzle.update(extract_model_default_fields(BasePuzzleState))
             puzzle["state"] = puzzle.pop("initial_state")
-            keys_present_in_state = PuzzleState.model_fields.keys()
+            keys_present_in_state = BasePuzzleState.model_fields.keys()
             keys_to_drop = puzzle.keys() - keys_present_in_state
             for key in keys_to_drop:
                 puzzle.pop(key)
-
     return room_dict
 
 
@@ -67,7 +61,7 @@ def room_key(slug: str):
 
 
 async def create_room_initial_states():
-    rooms = await fetch_room_model_details()
+    rooms = await fetch_room_configs()
     states = await asyncio.gather(
         *[global_client.json().get(room_key(room.slug)) for room in rooms]
     )

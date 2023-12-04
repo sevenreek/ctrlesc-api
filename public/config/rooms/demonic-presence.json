@@ -12,17 +12,15 @@
         {
           "slug": "cells",
           "name": "Cells",
-          "component": {
-            "type": "digitalState",
-            "completeOverrideEnabled": true,
-            "nameMap": {
-              "left": "Left cell",
-              "right": "Right cell"
-            },
-            "stateMap": {
-              "true": "Open",
-              "false": "Closed"
-            }
+          "type": "digitalState",
+          "complete_override_enabled": true,
+          "name_map": {
+            "left": "Left cell",
+            "right": "Right cell"
+          },
+          "state_map": {
+            "true": "Open",
+            "false": "Closed"
           },
           "initial_state": {
             "left": false,
@@ -40,16 +38,14 @@
         {
           "slug": "chest",
           "name": "Chest",
-          "component": {
-            "type": "digitalState",
-            "completeOverrideEnabled": true,
-            "stateMap": {
-              "true": "Open",
-              "false": "Closed"
-            },
-            "nameMap": {
-              "chest": "Chest"
-            }
+          "type": "digitalState",
+          "complete_override_enabled": true,
+          "state_map": {
+            "true": "Open",
+            "false": "Closed"
+          },
+          "name_map": {
+            "chest": "Chest"
           },
           "initial_state": {
             "chest": false
@@ -66,16 +62,14 @@
         {
           "slug": "coffin",
           "name": "Lower the coffin",
-          "component": {
-            "type": "digitalState",
-            "completeOverrideEnabled": true,
-            "stateMap": {
-              "true": "Lowered",
-              "false": "Not lowered"
-            },
-            "nameMap": {
-              "coffin": "Coffin"
-            }
+          "type": "digitalState",
+          "complete_override_enabled": true,
+          "state_map": {
+            "true": "Lowered",
+            "false": "Not lowered"
+          },
+          "name_map": {
+            "coffin": "Coffin"
           },
           "initial_state": {
             "coffin": false
@@ -91,21 +85,18 @@
       "puzzles": [
         {
           "slug": "wall_buttons",
+          "type": "sequence",
           "name": "Wall buttons",
           "completion_worth": 25,
-          "component": {
-            "type": "sequence",
-            "completeOverrideEnabled": true,
-            "length": 4,
-            "stateMap": {
-              "0": "G",
-              "1": "B",
-              "2": "O",
-              "3": "C"
-            },
-            "targetSequence": ["0", "1", "2", "3"]
+          "complete_override_enabled": true,
+          "state_map": {
+            "0": "G",
+            "1": "B",
+            "2": "O",
+            "3": "C"
           },
-          "initial_state": { "sequence": [null, null, null, null] }
+          "target_state": ["0", "1", "2", "3"],
+          "initial_state": [null, null, null, null]
         }
       ]
     },
@@ -118,19 +109,17 @@
           "slug": "skeleton",
           "name": "Skeleton",
           "completion_worth": 10,
-          "component": {
-            "type": "digitalState",
-            "completeOverrideEnabled": true,
-            "nameMap": {
-              "leftLeg": "Left leg",
-              "rightLeg": "Right leg",
-              "leftArm": "Left arm",
-              "rightArm": "Right arm"
-            },
-            "stateMap": {
-              "true": "Placed",
-              "false": "Absent"
-            }
+          "type": "digitalState",
+          "complete_override_enabled": true,
+          "name_map": {
+            "leftLeg": "Left leg",
+            "rightLeg": "Right leg",
+            "leftArm": "Left arm",
+            "rightArm": "Right arm"
+          },
+          "state_map": {
+            "true": "Placed",
+            "false": "Absent"
           },
           "initial_state": {
             "leftLeg": false,
@@ -149,16 +138,14 @@
         {
           "slug": "spellbook_bag",
           "name": "Spellbook",
-          "component": {
-            "type": "digitalState",
-            "completeOverrideEnabled": true,
-            "nameMap": {
-              "book": "Book"
-            },
-            "stateMap": {
-              "true": "Lowered",
-              "false": "Not lowered"
-            }
+          "type": "digitalState",
+          "complete_override_enabled": true,
+          "name_map": {
+            "book": "Book"
+          },
+          "state_map": {
+            "true": "Lowered",
+            "false": "Not lowered"
           },
           "initial_state": {
             "book": false
@@ -175,17 +162,15 @@
         {
           "slug": "spells",
           "name": "Spells",
-          "component": {
-            "type": "speechDetection",
-            "completeOverrideEnabled": true,
-            "words": ["Baal", "Lupes", "Capra"],
-            "stateMap": {
-              "true": "Cast",
-              "false": "Waiting"
-            }
+          "type": "speechDetection",
+          "complete_override_enabled": true,
+          "phrases": ["Baal", "Lupes", "Capra"],
+          "state_map": {
+            "true": "Cast",
+            "false": "Waiting"
           },
           "initial_state": {
-            "targetIndex": 0,
+            "currentPhrase": 0,
             "lastAttempts": []
           },
           "completion_worth": 10
