@@ -8,7 +8,7 @@ from api.lib.roomconfigs import fetch_room_configs
 from escmodels.room import RoomConfig, RoomState, StageConfig, StageState
 from escmodels.puzzle import BasePuzzleState
 from escmodels.base import TimerState
-from escmodels.util import extract_model_default_fields
+from escmodels.util import generate_room_initial_state
 from api.settings import settings
 
 global_client = redis.Redis(
@@ -28,32 +28,6 @@ async def get_client():
 
 
 DependsRedis = Annotated[redis.Redis, Depends(get_client)]
-
-
-def generate_room_initial_state(room: RoomConfig) -> dict[str, Any]:
-    room_dict = room.model_dump(
-        include={
-            "slug": True,
-            "stages": True,
-        }
-    )
-    room_dict.update(extract_model_default_fields(RoomState))
-
-    stage: dict
-    puzzle: dict
-    for stage in room_dict["stages"]:
-        keys_present_in_state = StageState.model_fields.keys()
-        keys_to_drop = stage.keys() - keys_present_in_state
-        for key in keys_to_drop:
-            stage.pop(key)
-        for puzzle in stage["puzzles"]:
-            puzzle.update(extract_model_default_fields(BasePuzzleState))
-            puzzle["state"] = puzzle.pop("initial_state")
-            keys_present_in_state = BasePuzzleState.model_fields.keys()
-            keys_to_drop = puzzle.keys() - keys_present_in_state
-            for key in keys_to_drop:
-                puzzle.pop(key)
-    return room_dict
 
 
 def room_key(slug: str):

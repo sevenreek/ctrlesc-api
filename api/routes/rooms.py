@@ -1,4 +1,5 @@
 from typing import Literal
+import time
 from fastapi import APIRouter, Request, HTTPException, status
 import asyncio
 from redis.asyncio import Redis
@@ -94,10 +95,10 @@ RoomAction = Literal["start", "stop", "pause", "add", "skip"]
 
 @router.post("/{slug}/{action}", status_code=status.HTTP_200_OK)
 async def details(
+    redis: DependsRedis,
     slug: str,
     action: RoomAction,
-    action_data: AnyRoomActionRequest,
-    redis: DependsRedis,
+    action_data: AnyRoomActionRequest | None = None,
 ):
     async with redis.pubsub() as ps:
         action_id = nanoid.generate()
@@ -108,8 +109,14 @@ async def details(
             request_data.update(action_data.model_dump())
         elif action == "add":
             request_data.update(action_data.model_dump())
-        await redis.publish(f"room/request/{slug}/{action_id}", action)
-        message = await ps.get_message(ignore_subscribe_messages=True, timeout=3)
+        await redis.publish(
+            f"room/request/{slug}/{action_id}", json.dumps({"action": action})
+        )
+        timeout_start = time.time()
+        message = None
+        while time.time() < timeout_start + 3 and message is None:
+            message = await ps.get_message(ignore_subscribe_messages=True)
+            asyncio.sleep(0.05)
         await ps.unsubscribe(redis_ack_channel)
         if message is None:
             raise HTTPException(
