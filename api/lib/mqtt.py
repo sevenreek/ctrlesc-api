@@ -1,6 +1,6 @@
 from gmqtt import Client as MQTTClient
 from os import getpid
-from settings import settings
+from api.settings import settings
 from typing import Literal, Callable, Annotated
 from collections import defaultdict
 from fastapi import Depends

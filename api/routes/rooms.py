@@ -11,9 +11,9 @@ from escmodels.room import (
 )
 from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
 from escmodels.base import TimerState
-from settings import settings
-from lib.redis import DependsRedis
-from lib.roomconfigs import fetch_room_configs, fetch_room_config
+from api.settings import settings
+from api.lib.redis import DependsRedis
+from api.lib.roomconfigs import fetch_room_configs, fetch_room_config
 from sse_starlette import EventSourceResponse
 import json
 import nanoid

@@ -4,7 +4,7 @@ import asyncio
 from pathlib import Path
 import json
 
-from settings import settings
+from api.settings import settings
 from escmodels.room import RoomConfig
 
 
