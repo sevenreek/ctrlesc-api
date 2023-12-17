@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 
 from settings import settings
-from models.room import RoomConfig
+from escmodels.room import RoomConfig
 
 
 async def fetch_file(file: str) -> str:

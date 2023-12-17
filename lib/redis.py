@@ -5,10 +5,10 @@ import redis.asyncio as redis
 from inspect import Signature
 
 from lib.roomconfigs import fetch_room_configs
-from models.room import RoomConfig, RoomState, StageConfig, StageState
-from models.puzzle import BasePuzzleState
-from models.base import TimerState
-from models.util import extract_model_default_fields
+from escmodels.room import RoomConfig, RoomState, StageConfig, StageState
+from escmodels.puzzle import BasePuzzleState
+from escmodels.base import TimerState
+from escmodels.util import extract_model_default_fields
 from settings import settings
 
 global_client = redis.Redis(
