@@ -2,15 +2,15 @@ from typing import Literal
 import time
 from fastapi import APIRouter, Request, HTTPException, status
 import asyncio
+import humps
 from redis.asyncio import Redis
 from escmodels.room import (
     RoomConfig,
     Room,
     RoomState,
-    AnyRoomActionRequest,
-    PuzzleSkipRequest,
 )
 from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
+from escmodels.requests import AnyRoomActionRequest
 from escmodels.base import TimerState
 from api.settings import settings
 from api.lib.redis import DependsRedis
@@ -32,7 +32,7 @@ async def fetch_room_state(redis: Redis, slug: str):
     return RoomState.model_validate(json)
 
 
-@router.get("/", response_model=list[Room])
+@router.get("", response_model=list[Room])
 async def index(redis: DependsRedis):
     configs = await fetch_room_configs()
     slugs = (c.slug for c in configs)
@@ -46,24 +46,23 @@ async def index(redis: DependsRedis):
 def create_sse_update(channel: str, string_data: str | None):
     topic_path = channel.split("/")
     update_type, room = topic_path[1:3]
-    meta, data = {"room": room}, {}
-    return_data = {"meta": meta, "data": data}
+    update_data = {}
+    return_data = {"room": room, "update": update_data}
     event_data = json.loads(string_data)
     try:
         stage = topic_path[3]
-        meta["stage"] = stage
-    except IndexError:
-        pass
-    try:
+        return_data["stage"] = stage
         puzzle = topic_path[4]
-        meta["puzzle"] = puzzle
+        return_data["puzzle"] = puzzle
     except IndexError:
         pass
     match update_type:
         case "state":
-            data["state"] = event_data
+            update_data.update(
+                {humps.camelize(key): value for key, value in event_data.items()}
+            )
         case "completion":
-            data["completed"] = bool(event_data)
+            update_data["completed"] = bool(event_data)
     return {"data": json.dumps(return_data), "event": "update"}
 
 
@@ -90,33 +89,25 @@ async def details(slug: str, redis: DependsRedis):
     return Room(config, state)
 
 
-RoomAction = Literal["start", "stop", "pause", "add", "skip"]
-
-
-@router.post("/{slug}/{action}", status_code=status.HTTP_200_OK)
-async def details(
-    redis: DependsRedis,
-    slug: str,
-    action: RoomAction,
-    action_data: AnyRoomActionRequest | None = None,
-):
+@router.post("/{slug}/request", status_code=status.HTTP_200_OK)
+async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequest):
     async with redis.pubsub() as ps:
         action_id = nanoid.generate()
         redis_ack_channel = f"room/ack/{slug}/{action_id}"
         await ps.subscribe(redis_ack_channel)
-        request_data = {"action": action}
-        if action == "skip":
+        request_data = action_data.model_dump()
+        if action_data.action == "skip":
             request_data.update(action_data.model_dump())
-        elif action == "add":
+        elif action_data.action == "add":
             request_data.update(action_data.model_dump())
         await redis.publish(
-            f"room/request/{slug}/{action_id}", json.dumps({"action": action})
+            f"room/request/{slug}/{action_id}", json.dumps(request_data)
         )
         timeout_start = time.time()
         message = None
         while time.time() < timeout_start + 3 and message is None:
             message = await ps.get_message(ignore_subscribe_messages=True)
-            asyncio.sleep(0.05)
+            await asyncio.sleep(0.05)
         await ps.unsubscribe(redis_ack_channel)
         if message is None:
             raise HTTPException(
@@ -125,6 +116,7 @@ async def details(
                     "message": f"Timed out waiting for response from {slug} for action {str(request_data)}."
                 },
             )
+        return message["data"]
 
 
 @router.get("/puzzle/supported", response_model=list[PuzzleType])
