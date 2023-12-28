@@ -10,7 +10,7 @@ from escmodels.room import (
     RoomState,
 )
 from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
-from escmodels.requests import AnyRoomActionRequest
+from escmodels.requests import AnyRoomActionRequest, RequestResult
 from escmodels.base import TimerState
 from api.settings import settings
 from api.lib.redis import DependsRedis
@@ -89,7 +89,9 @@ async def details(slug: str, redis: DependsRedis):
     return Room(config, state)
 
 
-@router.post("/{slug}/request", status_code=status.HTTP_200_OK)
+@router.post(
+    "/{slug}/request", status_code=status.HTTP_200_OK, response_model=RequestResult
+)
 async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequest):
     async with redis.pubsub() as ps:
         action_id = nanoid.generate()
@@ -116,7 +118,7 @@ async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequ
                     "message": f"Timed out waiting for response from {slug} for action {str(request_data)}."
                 },
             )
-        return message["data"]
+        return RequestResult.model_validate_json(message["data"])
 
 
 @router.get("/puzzle/supported", response_model=list[PuzzleType])
