@@ -1,14 +1,11 @@
 from typing import Literal
 import time
+from api.lib.db import DependsDB
 from fastapi import APIRouter, Request, HTTPException, status
 import asyncio
 import humps
 from redis.asyncio import Redis
-from escmodels.room import (
-    RoomConfig,
-    Room,
-    RoomState,
-)
+from escmodels.room import RoomConfig, Room, RoomState
 from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
 from escmodels.requests import AnyRoomActionRequest, RequestResult
 from escmodels.base import TimerState
@@ -119,6 +116,11 @@ async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequ
                 },
             )
         return RequestResult.model_validate_json(message["data"])
+
+
+@router.get("/{slug}/completion_stats")
+async def details(slug: str, db: DependsDB):
+    print(db)
 
 
 @router.get("/puzzle/supported", response_model=list[PuzzleType])

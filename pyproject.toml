@@ -22,6 +22,7 @@ gmqtt = "^0.6.12"
 redis = {extras = ["hiredis"], version = "^4.6.0"}
 escmodels = {path = "../escmodels", develop = true}
 nanoid = "^2.0.0"
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]
