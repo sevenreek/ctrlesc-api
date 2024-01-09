@@ -118,9 +118,9 @@ async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequ
         return RequestResult.model_validate_json(message["data"])
 
 
-@router.get("/{slug}/completion_stats")
-async def details(slug: str, db: DependsDB):
-    print(db)
+@router.get("/{slug}/games/{game_id}/events")
+async def game_events(slug: str, game_id: str, db: DependsDB):
+    pass
 
 
 @router.get("/puzzle/supported", response_model=list[PuzzleType])
