@@ -12,7 +12,7 @@
         {
           "slug": "cells",
           "name": "Cells",
-          "type": "digitalState",
+          "type": "DIGITAL_STATE",
           "complete_override_enabled": true,
           "name_map": {
             "left": "Left cell",
@@ -38,7 +38,7 @@
         {
           "slug": "chest",
           "name": "Chest",
-          "type": "digitalState",
+          "type": "DIGITAL_STATE",
           "complete_override_enabled": true,
           "state_map": {
             "true": "Open",
@@ -62,7 +62,7 @@
         {
           "slug": "coffin",
           "name": "Lower the coffin",
-          "type": "digitalState",
+          "type": "DIGITAL_STATE",
           "complete_override_enabled": true,
           "state_map": {
             "true": "Lowered",
@@ -85,7 +85,7 @@
       "puzzles": [
         {
           "slug": "wall_buttons",
-          "type": "sequence",
+          "type": "SEQUENCE",
           "name": "Wall buttons",
           "completion_worth": 25,
           "complete_override_enabled": true,
@@ -95,8 +95,10 @@
             "2": "O",
             "3": "C"
           },
-          "target_state": ["0", "1", "2", "3"],
-          "initial_state": [null, null, null, null]
+          "initial_state": [null, null, null, null],
+          "extras": {
+            "target_state": ["0", "1", "2", "3"]
+          }
         }
       ]
     },
@@ -109,7 +111,7 @@
           "slug": "skeleton",
           "name": "Skeleton",
           "completion_worth": 10,
-          "type": "digitalState",
+          "type": "DIGITAL_STATE",
           "complete_override_enabled": true,
           "name_map": {
             "leftLeg": "Left leg",
@@ -138,7 +140,7 @@
         {
           "slug": "spellbook_bag",
           "name": "Spellbook",
-          "type": "digitalState",
+          "type": "DIGITAL_STATE",
           "complete_override_enabled": true,
           "name_map": {
             "book": "Book"
@@ -162,9 +164,8 @@
         {
           "slug": "spells",
           "name": "Spells",
-          "type": "speechDetection",
+          "type": "SPEECH_DETECTION",
           "complete_override_enabled": true,
-          "phrases": ["Baal", "Lupes", "Capra"],
           "state_map": {
             "true": "Cast",
             "false": "Waiting"
@@ -173,7 +174,10 @@
             "currentPhrase": 0,
             "lastAttempts": []
           },
-          "completion_worth": 10
+          "completion_worth": 10,
+          "extras": {
+            "phrases": ["Baal", "Lupes", "Capra"]
+          }
         }
       ]
     }

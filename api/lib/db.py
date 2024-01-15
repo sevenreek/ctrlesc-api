@@ -2,8 +2,8 @@ import contextlib
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base, sessionmaker
 from api.settings import settings
+from escmodels.db.base import Base
 
 
 db_url = f"postgresql+asyncpg://{settings.db_user}:{settings.db_password}@{settings.db_host}/{settings.db_name}"
@@ -29,3 +29,10 @@ async def get_db():
 
 
 DependsDB = Annotated[AsyncSession, Depends(get_db)]
+
+
+async def debug_startup():
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+        await connection.commit()

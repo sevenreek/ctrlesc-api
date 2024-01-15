@@ -15,6 +15,8 @@ from api.lib.roomconfigs import fetch_room_configs, fetch_room_config
 from sse_starlette import EventSourceResponse
 import json
 import nanoid
+from sqlalchemy import select
+from escmodels.db.models import Game
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
@@ -118,9 +120,12 @@ async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequ
         return RequestResult.model_validate_json(message["data"])
 
 
-@router.get("/{slug}/games/{game_id}/events")
-async def game_events(slug: str, game_id: str, db: DependsDB):
-    pass
+@router.get("/{slug}/games/{game_id}")
+async def game(slug: str, game_id: str, db: DependsDB):
+    statement = select(Game).where(Game.id == int(game_id))
+    result = await db.scalars(statement)
+    await db.commit()
+    return result
 
 
 @router.get("/puzzle/supported", response_model=list[PuzzleType])
