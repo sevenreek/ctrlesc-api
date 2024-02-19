@@ -88,6 +88,12 @@ async def details(slug: str, redis: DependsRedis):
     return Room(config, state)
 
 
+@router.get("/{slug}/config", response_model=RoomConfig)
+async def details(slug: str, redis: DependsRedis):
+    config = await fetch_room_config(slug)
+    return RoomConfig.model_validate(config)
+
+
 @router.post(
     "/{slug}/request", status_code=status.HTTP_200_OK, response_model=RequestResult
 )
