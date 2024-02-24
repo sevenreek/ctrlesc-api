@@ -1,7 +1,7 @@
-from typing import Literal
+from typing import Literal, Annotated
 import time
 from api.lib.db import DependsDB
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Query
 import asyncio
 import humps
 from redis.asyncio import Redis
@@ -9,13 +9,16 @@ from escmodels.room import RoomConfig, Room, RoomState
 from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
 from escmodels.requests import AnyRoomActionRequest, RequestResult
 from escmodels.base import TimerState
+import escmodels.db.models as dbm
 from api.settings import settings
 from api.lib.redis import DependsRedis
 from api.lib.roomconfigs import fetch_room_configs, fetch_room_config
 from sse_starlette import EventSourceResponse
 import json
 import nanoid
-from sqlalchemy import select
+from sqlalchemy import select, func, cast
+from sqlalchemy.sql.functions import Function as SQLFunction
+import sqlalchemy
 from escmodels.db.models import Game
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
@@ -92,6 +95,47 @@ async def details(slug: str, redis: DependsRedis):
 async def details(slug: str, redis: DependsRedis):
     config = await fetch_room_config(slug)
     return RoomConfig.model_validate(config)
+
+
+AllowedCompletions = Literal[
+    "best",
+    "worst",
+    "average",
+]
+AllowedCompletionsQueryType = Annotated[list[AllowedCompletions], Query()]
+
+FUNC_MAPPING: dict[str, SQLFunction] = {
+    "best": func.min,
+    "worst": func.max,
+    "average": func.avg,
+}
+
+
+@router.get("/{slug}/segments")
+async def details(
+    db: DependsDB,
+    slug: str,
+    funcs: AllowedCompletionsQueryType = list(AllowedCompletions.__args__),
+    ignore_failed: bool = True,
+):
+    select_keys = [
+        cast(
+            FUNC_MAPPING[label](dbm.StageCompletion.duration).label(label),
+            sqlalchemy.Double,
+        )
+        for label in funcs
+    ]
+    query = (
+        select(*select_keys)
+        .join(dbm.Stage, dbm.Stage.id == dbm.StageCompletion.stage_id)
+        .join(dbm.Room, dbm.Room.id == dbm.Stage.room_id)
+        .where(dbm.Room.slug == slug)
+        .group_by(dbm.Stage.index)
+        .order_by(dbm.Stage.index)
+    )
+    result = await db.execute(query)
+    rows = result.all()
+    return {key: [row._mapping[key] for row in rows] for key in funcs}
 
 
 @router.post(
