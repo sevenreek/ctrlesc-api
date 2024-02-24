@@ -65,7 +65,7 @@ async def populate_games(
     room: Room,
     *,
     game_count=20,
-    relative_time_variance=0.4,
+    relative_time_variance=0.15,
     time_per_completion_point=60,
     throw_on_future=True,
 ) -> list[Game]:
@@ -87,8 +87,8 @@ async def populate_games(
                 stage_completion = get_stage_completion_value(stage)
                 stage_time_mean = stage_completion * time_per_completion_point
                 stage_time_variance = relative_time_variance * stage_time_mean
-                final_stage_time = np.random.normal(
-                    stage_time_mean, stage_time_variance
+                final_stage_time = max(
+                    30, np.random.normal(stage_time_mean, stage_time_variance)
                 )
                 total_seconds_taken += final_stage_time
                 stage_completion = StageCompletion(
