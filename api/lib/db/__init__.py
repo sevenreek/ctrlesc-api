@@ -31,7 +31,7 @@ async def get_db():
 DependsDB = Annotated[AsyncSession, Depends(get_db)]
 
 
-async def debug_startup():
+async def recreate_schema():
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.drop_all)
         await connection.run_sync(Base.metadata.create_all)

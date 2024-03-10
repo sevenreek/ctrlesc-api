@@ -5,12 +5,11 @@ from fastapi import APIRouter, Request, HTTPException, status, Query
 import asyncio
 import humps
 from redis.asyncio import Redis
-from escmodels.room import RoomConfig, Room, RoomState
-from escmodels.puzzle import PuzzleType, make_puzzle, infer_puzzle_config
+from api.lib.db.games import fetch_game
+import escmodels.base as base
+import escmodels.db as dbm
+import escmodels.api.out as out
 from escmodels.requests import AnyRoomActionRequest, RequestResult
-from escmodels.base import TimerState
-import escmodels.db.models as dbm
-from api.settings import settings
 from api.lib.redis import DependsRedis
 from api.lib.roomconfigs import fetch_room_configs, fetch_room_config
 from sse_starlette import EventSourceResponse
@@ -19,7 +18,6 @@ import nanoid
 from sqlalchemy import select, func, cast
 from sqlalchemy.sql.functions import Function as SQLFunction
 import sqlalchemy
-from escmodels.db.models import Game
 
 router = APIRouter(prefix="/rooms", tags=["rooms"])
 
@@ -31,18 +29,18 @@ async def fetch_room_state_json(redis: Redis, slug: str):
 
 async def fetch_room_state(redis: Redis, slug: str):
     json = await fetch_room_state_json(redis, slug)
-    return RoomState.model_validate(json)
+    return base.RoomState.model_validate(json)
 
 
-@router.get("", response_model=list[Room])
+@router.get("", response_model=list[out.Room])
 async def index(redis: DependsRedis):
     configs = await fetch_room_configs()
     slugs = (c.slug for c in configs)
     states = await asyncio.gather(
         *(fetch_room_state_json(redis, slug) for slug in slugs)
     )
-    states = [RoomState.model_validate(state) for state in states]
-    return [Room(config, state) for config, state in zip(configs, states)]
+    states = [base.RoomState.model_validate(state) for state in states]
+    return [out.Room.create(config, state) for config, state in zip(configs, states)]
 
 
 def create_sse_update(channel: str, string_data: str | None):
@@ -50,7 +48,7 @@ def create_sse_update(channel: str, string_data: str | None):
     update_type, room = topic_path[1:3]
     update_data = {}
     return_data = {"room": room, "update": update_data}
-    event_data = json.loads(string_data)
+    event_data: dict | bool = json.loads(string_data)
     try:
         stage = topic_path[3]
         return_data["stage"] = stage
@@ -74,7 +72,9 @@ async def sse(request: Request, redis: DependsRedis):
         async with redis.pubsub() as ps:
             await ps.psubscribe("room/state/*", "room/completion/*")
             while ps.subscribed:
-                message = await ps.get_message(ignore_subscribe_messages=True)
+                message: None | dict = await ps.get_message(
+                    ignore_subscribe_messages=True
+                )
                 if message is not None:
                     channel: str = message["channel"]
                     yield create_sse_update(channel, message.get("data", None))
@@ -83,18 +83,19 @@ async def sse(request: Request, redis: DependsRedis):
     return EventSourceResponse(event_generator())
 
 
-@router.get("/{slug}", response_model=Room)
-async def details(slug: str, redis: DependsRedis):
+@router.get("/{slug}", response_model=out.RoomGame)
+async def details(redis: DependsRedis, db: DependsDB, slug: str):
     config, state = await asyncio.gather(
         fetch_room_config(slug), fetch_room_state(redis, slug)
     )
-    return Room(config, state)
+    game = await fetch_game(db, state.active_game_id) if state.active_game_id else None
+    return out.RoomGame.create(config, state, game)
 
 
-@router.get("/{slug}/config", response_model=RoomConfig)
+@router.get("/{slug}/config", response_model=out.RoomConfig)
 async def details(slug: str, redis: DependsRedis):
     config = await fetch_room_config(slug)
-    return RoomConfig.model_validate(config)
+    return out.RoomConfig.model_validate(config)
 
 
 AllowedCompletions = Literal[
@@ -116,7 +117,6 @@ async def details(
     db: DependsDB,
     slug: str,
     funcs: AllowedCompletionsQueryType = list(AllowedCompletions.__args__),
-    ignore_failed: bool = True,
 ):
     select_keys = [
         cast(
@@ -172,12 +172,10 @@ async def request(redis: DependsRedis, slug: str, action_data: AnyRoomActionRequ
 
 @router.get("/{slug}/games/{game_id}")
 async def game(slug: str, game_id: str, db: DependsDB):
-    statement = select(Game).where(Game.id == int(game_id))
-    result = await db.scalars(statement)
-    await db.commit()
+    result = await fetch_game(db, game_id)
     return result
 
 
-@router.get("/puzzle/supported", response_model=list[PuzzleType])
+@router.get("/puzzle/supported", response_model=list[base.PuzzleType])
 async def get_supported_puzzles():
-    return [t.value for t in PuzzleType]
+    return [t.value for t in base.PuzzleType]

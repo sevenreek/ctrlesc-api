@@ -1,8 +1,9 @@
 from pydantic_settings import BaseSettings
+import os
 
 
 class Settings(BaseSettings):
-    room_config_dir: str = "./public/config/rooms"
+    room_config_dir: str = os.path.expanduser("~/ctrlesc/api/api/public/config/rooms")
     redis_url: str = "localhost"
     redis_port: str = "6379"
     mqtt_url: str = "localhost"

@@ -1,5 +1,5 @@
 from api.lib.db import obtain_session
-from escmodels.room import RoomConfig, StageConfig, AnyPuzzleConfig
+from escmodels.base.room import RoomConfig, StageConfig
 from escmodels.db.models import Game, Room, Stage, Puzzle, StageCompletion, GameResult
 from sqlalchemy import delete
 import numpy as np
@@ -101,7 +101,7 @@ async def populate_games(
                 session.add(stage_completion)
             game.ended_on = game_datetime + timedelta(seconds=total_seconds_taken)
             game.result = GameResult.COMPLETED
-            game.seconds_taken = total_seconds_taken
+            game.duration = total_seconds_taken
             next_timeslot = game_datetime + timedelta(
                 seconds=room.base_time + 5 * 60
             )  # 5 min cleanup time

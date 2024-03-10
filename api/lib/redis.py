@@ -1,14 +1,10 @@
-from typing import Annotated, Any
+from typing import Annotated
 from fastapi import Depends
 import asyncio
 import redis.asyncio as redis
-from inspect import Signature
-
 from api.lib.roomconfigs import fetch_room_configs
-from escmodels.room import RoomConfig, RoomState, StageConfig, StageState
-from escmodels.puzzle import BasePuzzleState
-from escmodels.base import TimerState
-from escmodels.util import generate_room_initial_state
+import escmodels.base as base
+from escmodels.base.room import generate_room_initial_state
 from api.settings import settings
 
 global_client = redis.Redis(

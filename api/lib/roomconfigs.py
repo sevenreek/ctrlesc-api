@@ -2,10 +2,9 @@ import aiofiles
 import os
 import asyncio
 from pathlib import Path
-import json
 
 from api.settings import settings
-from escmodels.room import RoomConfig
+import escmodels.base as base
 
 
 async def fetch_file(file: str) -> str:
@@ -47,7 +46,7 @@ async def fetch_room_config(slug: str):
         RoomConfig: A parsed config for the room.
     """
     content = await fetch_room_config_data(slug)
-    return RoomConfig.model_validate_json(content)
+    return base.RoomConfig.model_validate_json(content)
 
 
 async def fetch_room_configs_data() -> list[str]:
@@ -74,4 +73,4 @@ async def fetch_room_configs():
         list[RoomConfig]: A list of room configurations.
     """
     file_contents = await fetch_room_configs_data()
-    return [RoomConfig.model_validate_json(json) for json in file_contents]
+    return [base.RoomConfig.model_validate_json(json) for json in file_contents]

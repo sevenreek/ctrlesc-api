@@ -7,7 +7,6 @@ from api.lib.mock.db import (
     drop_all_room_configs,
     populate_games,
 )
-from api.lib.db import debug_startup as debug_db_startup
 from escmodels.db.models import *
 from api.lib.roomconfigs import fetch_room_configs
 
@@ -16,12 +15,6 @@ from api.routes.rooms import router as room_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await debug_db_startup()
-    await drop_all_room_configs()
-    configs = await fetch_room_configs()
-    db_configs = await populate_db_room_configs(configs)
-    for roomconfig in db_configs:
-        db_games = await populate_games(roomconfig)
     await redis_start()
     await mqtt_start()
     yield
