@@ -1,3 +1,5 @@
+from api.lib import erorrs
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, cast
 from sqlalchemy.orm import joinedload
@@ -22,5 +24,8 @@ async def fetch_game(db: AsyncSession, game_id: str):
         .options(joinedload(Game.stage_completions))
     )
     result = await db.execute(query)
-    result = result.unique().scalar_one()
+    try:
+        result = result.unique().scalar_one()
+    except NoResultFound:
+        raise erorrs.NotFound(f"The game {game_id} was not found")
     return result
