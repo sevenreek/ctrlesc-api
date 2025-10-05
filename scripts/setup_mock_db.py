@@ -14,7 +14,7 @@ async def setup_mock_db():
     configs = await fetch_room_configs()
     db_configs = await populate_db_room_configs(configs)
     for roomconfig in db_configs:
-        db_games = await populate_games(roomconfig)
+        _ = await populate_games(roomconfig)
 
 
 def sync_setup_mock_db():

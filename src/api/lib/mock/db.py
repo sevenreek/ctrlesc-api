@@ -1,4 +1,5 @@
 from api.lib.db import obtain_session
+from api.lib.mock.id import generate_snowflake_id
 from escmodels.base.room import RoomConfig
 from escmodels.db.models import Game, Room, Stage, Puzzle, StageCompletion, GameResult
 from sqlalchemy import delete
@@ -17,7 +18,7 @@ async def drop_all_room_configs():
 
 
 async def populate_db_room_configs(configs: list[RoomConfig]) -> list[Room]:
-    rooms = []
+    rooms: list[Room] = []
     async with obtain_session() as session:
         for room_config in configs:
             room = Room(**room_config.model_dump(exclude={"stages"}))
@@ -43,9 +44,9 @@ def get_stage_completion_value(stage: Stage):
 def get_next_nice_datetime(
     dt: datetime,
     *,
-    minute_granularity=15,
-    shift_start_time=time(12),
-    shift_end_time=time(23),
+    minute_granularity: int = 15,
+    shift_start_time: time = time(12),
+    shift_end_time: time = time(23),
 ):
     dt_time = dt.time()
     if dt_time > shift_end_time:
@@ -64,10 +65,10 @@ def get_next_nice_datetime(
 async def populate_games(
     room: Room,
     *,
-    game_count=20,
-    relative_time_variance=0.15,
-    time_per_completion_point=60,
-    throw_on_future=True,
+    game_count: int = 20,
+    relative_time_variance: float = 0.15,
+    time_per_completion_point: int = 60,
+    throw_on_future: bool = True,
 ) -> list[Game]:
     games : list[Game] = []
     async with obtain_session() as session:
@@ -81,7 +82,7 @@ async def populate_games(
                 raise ValueError(
                     f"Could not generate the requested {game_count} games. Gametime for game no. {game_index} would exceed current timestamp {now} at {game_datetime}."
                 )
-            game = Game(room=room, started_on=game_datetime, created_on=game_datetime)
+            game = Game(id= generate_snowflake_id(game_datetime, room.id) , room=room, started_on=game_datetime, created_on=game_datetime)
             total_seconds_taken: int = 0
             for stage in room.stages:
                 stage_completion = get_stage_completion_value(stage)
